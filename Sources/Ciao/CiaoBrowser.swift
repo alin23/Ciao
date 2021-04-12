@@ -18,6 +18,7 @@ public class CiaoBrowser {
     public var serviceFoundHandler: ((NetService) -> Void)?
     public var serviceRemovedHandler: ((NetService) -> Void)?
     public var serviceResolvedHandler: ((Result<NetService, ErrorDictionary>) -> Void)?
+    public var serviceUpdatedTXTHandler: ((NetService) -> Void)?
 
 
     public var isSearching = false {
@@ -61,6 +62,11 @@ public class CiaoBrowser {
         serviceRemovedHandler?(service)
     }
 
+    fileprivate func serviceUpdatedTXT(_ service: NetService, _ txtRecord: Data) {
+        service.setTXTRecord(txtRecord)
+        serviceUpdatedTXTHandler?(service)
+    }
+
     public func stop() {
         netServiceBrowser.stop()
     }
@@ -70,30 +76,35 @@ public class CiaoBrowser {
     }
 }
 
-class CiaoBrowserDelegate: NSObject, NetServiceBrowserDelegate {
+public class CiaoBrowserDelegate: NSObject, NetServiceBrowserDelegate {
     weak var browser: CiaoBrowser?
-    func netServiceBrowser(_ browser: NetServiceBrowser, didFind service: NetService, moreComing: Bool) {
+    public func netServiceBrowser(_ browser: NetServiceBrowser, didFind service: NetService, moreComing: Bool) {
         Logger.info("Service found", service)
         self.browser?.serviceFound(service)
     }
 
-    func netServiceBrowserWillSearch(_ browser: NetServiceBrowser) {
+    public func netServiceBrowserWillSearch(_ browser: NetServiceBrowser) {
         Logger.info("Browser will search")
         self.browser?.isSearching = true
     }
 
-    func netServiceBrowserDidStopSearch(_ browser: NetServiceBrowser) {
+    public func netServiceBrowserDidStopSearch(_ browser: NetServiceBrowser) {
         Logger.info("Browser stopped search")
         self.browser?.isSearching = false
     }
 
-    func netServiceBrowser(_ browser: NetServiceBrowser, didNotSearch errorDict: [String: NSNumber]) {
+    public func netServiceBrowser(_ browser: NetServiceBrowser, didNotSearch errorDict: [String: NSNumber]) {
         Logger.debug("Browser didn't search", errorDict)
         self.browser?.isSearching = false
     }
 
-    func netServiceBrowser(_ browser: NetServiceBrowser, didRemove service: NetService, moreComing: Bool) {
+    public func netServiceBrowser(_ browser: NetServiceBrowser, didRemove service: NetService, moreComing: Bool) {
         Logger.info("Service removed", service)
         self.browser?.serviceRemoved(service)
+    }
+
+    public func netService(_ sender: NetService, didUpdateTXTRecord data: Data) {
+        Logger.info("Service updated txt records", sender)
+        self.browser?.serviceUpdatedTXT(sender, data)
     }
 }
