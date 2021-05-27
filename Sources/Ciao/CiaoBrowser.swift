@@ -44,6 +44,7 @@ public class CiaoBrowser {
     }
 
     fileprivate func serviceFound(_ service: NetService) {
+        service.startMonitoring()
         services.update(with: service)
         serviceFoundHandler?(service)
 
@@ -68,6 +69,9 @@ public class CiaoBrowser {
     }
 
     public func stop() {
+        for service in services {
+            service.stopMonitoring()
+        }
         netServiceBrowser.stop()
     }
 
