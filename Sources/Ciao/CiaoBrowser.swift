@@ -72,6 +72,7 @@ public class CiaoBrowser {
         for service in services {
             service.stopMonitoring()
         }
+        services.removeAll()
         netServiceBrowser.stop()
     }
 
