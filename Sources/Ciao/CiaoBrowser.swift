@@ -39,7 +39,6 @@ public class CiaoBrowser {
     }
 
     public func browse(type: String, domain: String = "") {
-        stop()
         netServiceBrowser.searchForServices(ofType: type, inDomain: domain)
     }
 
@@ -68,16 +67,27 @@ public class CiaoBrowser {
         serviceUpdatedTXTHandler?(service)
     }
 
+    public func reset() {
+        stop()
+        services.removeAll()
+        netServiceBrowser.delegate = nil
+        netServiceBrowser = NetServiceBrowser()
+        netServiceBrowser.delegate = delegate
+    }
+
     public func stop() {
         for service in services {
             service.stopMonitoring()
         }
-        services.removeAll()
+
         netServiceBrowser.stop()
     }
 
     deinit {
         stop()
+
+        services.removeAll()
+        netServiceBrowser.delegate = nil
     }
 }
 
